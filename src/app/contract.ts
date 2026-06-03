@@ -1,8 +1,7 @@
 import { Abi } from "viem"
 
-export const contractAddress = '0x04b0C929B9F69E8b3Be1DA0b746C60D069bd8AE4' as const
+export const contractAddress = '0xB928e933c02DE4e4e74116EC1FF7ff4E1FB16297' as const
 export const contractABI = [
- 
 	{
 		"inputs": [
 			{
@@ -149,6 +148,19 @@ export const contractABI = [
 		],
 		"name": "ERC721OutOfBoundsIndex",
 		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "likeNFT",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -475,6 +487,25 @@ export const contractABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "getLikes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "owner",
 				"type": "address"
@@ -491,6 +522,25 @@ export const contractABI = [
 				"internalType": "bool",
 				"name": "",
 				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "likes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",

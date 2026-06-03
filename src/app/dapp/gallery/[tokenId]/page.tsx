@@ -1,12 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { useReadContract } from 'wagmi'
 import { contractABI, contractAddress } from '../../../contract'
-import { Card } from '../../../ui/kit'
+import { useMemo, useState } from 'react'
+import { useReadContract, useWriteContract } from 'wagmi'
+import { Card, Button } from '../../../ui/kit'
 import { ipfsToGateway, parseIpfsUri, shortenAddress } from '../../../ui/utils'
 
 export default function NftDetailPage() {
@@ -45,7 +45,41 @@ export default function NftDetailPage() {
     args: tokenId !== null ? [tokenId] : undefined,
     query: { enabled: tokenId !== null },
   })
+const likesRead = useReadContract({
+  abi: contractABI,
+  address: contractAddress,
+  functionName: 'getLikes',
+  args: tokenId !== null ? [tokenId] : undefined,
+  query: { enabled: tokenId !== null },
+})
 
+const { writeContractAsync, isPending: isLiking } = useWriteContract()
+const [likeStatus, setLikeStatus] = useState('')
+const [likeError, setLikeError] = useState('')
+
+async function handleLikeNFT() {
+  if (tokenId === null) return
+
+  try {
+    setLikeStatus('')
+    setLikeError('')
+
+    const hash = await writeContractAsync({
+      abi: contractABI,
+      address: contractAddress,
+      functionName: 'likeNFT',
+      args: [tokenId],
+    })
+
+    setLikeStatus(`좋아요 트랜잭션 전송 완료: ${hash.slice(0, 10)}...`)
+
+    setTimeout(() => {
+      likesRead.refetch()
+    }, 3000)
+  } catch (e) {
+    setLikeError(e instanceof Error ? e.message : String(e))
+  }
+}
   const tokenURI =
     typeof tokenURIRead.data === 'string' ? tokenURIRead.data : ''
 
@@ -159,7 +193,44 @@ export default function NftDetailPage() {
               </div>
             </div>
           </Card>
+<Card title="NFT 좋아요">
+  <div className="flex flex-col gap-3">
+    <div className="rounded-xl bg-zinc-50 p-3 text-sm dark:bg-black/40">
+      <div className="text-xs text-zinc-600 dark:text-zinc-400">
+        현재 좋아요 수
+      </div>
+      <div className="mt-1 text-2xl font-bold">
+        ❤️ {likesRead.isError ? '에러' : String(likesRead.data ?? '0')}
+      </div>
+    </div>
 
+    <div className="flex flex-wrap items-center gap-2">
+      <Button onClick={handleLikeNFT} disabled={isLiking}>
+        {isLiking ? '좋아요 처리 중...' : '❤️ 좋아요'}
+      </Button>
+
+      <Button
+        type="button"
+        onClick={() => likesRead.refetch()}
+        className="bg-zinc-700 hover:bg-zinc-600 dark:bg-zinc-200 dark:hover:bg-white"
+      >
+        좋아요 새로고침
+      </Button>
+    </div>
+
+    {likeStatus ? (
+      <p className="text-xs text-green-600 dark:text-green-400">
+        {likeStatus}
+      </p>
+    ) : null}
+
+    {likeError ? (
+      <p className="text-xs text-red-500">
+        {likeError}
+      </p>
+    ) : null}
+  </div>
+</Card>
           <Card title="미디어">
             {imageRaw ? (
               <img
